@@ -28,6 +28,15 @@ public:
 
                 generator->m_vars[node_stmt_var.identifier.value.value()] = Var{node_stmt_var.identifier.value.value()};
             }
+
+            void operator()(const NodeStmtPow& node_stmt_pow){
+                generator->m_output << "\tstd::pow(";
+                generator->gen_expr(node_stmt_pow.base);
+                generator->m_output << ", ";
+                generator->gen_expr(node_stmt_pow.exponent);
+                generator->m_output << ");\n";
+            }
+
         };
         std::visit(StmtVisitor{this}, node_stmt.node);
     }
@@ -68,6 +77,15 @@ public:
             void operator()(const NodeExprIdentifier& node_expr_identifier){
                 generator->m_output << node_expr_identifier.token.value.value();
             }
+            void operator()(const NodeExprPow& node_expr_pow){
+                generator->m_output << "std::pow(";
+                generator->gen_expr(*node_expr_pow.base);
+                generator->m_output << ", ";
+                generator->gen_expr(*node_expr_pow.exponent);
+                generator->m_output << ")";
+
+            }
+     
         };
 
         std::visit(ExprVisitor{this}, node_expr.node);
@@ -75,6 +93,7 @@ public:
 
     std::string generate() {
         m_output << "#include <iostream>" << std::endl;
+        m_output << "#include <cmath>" << std::endl;
         m_output << "int main() {" << std::endl;
 
         for (const auto& node_expr : node.node) {

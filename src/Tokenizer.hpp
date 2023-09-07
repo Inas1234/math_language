@@ -15,7 +15,9 @@ enum class TokenType{
     VAR,
     IDENTIFIER,
     EQUALS,
-    END
+    END,
+    POW,
+    COMMA
 };
 
 struct Token
@@ -44,6 +46,10 @@ public:
                 }
                 else if (buffer == "fin"){
                     tokens.push_back({TokenType::END});
+                    buffer.clear();
+                }
+                else if (buffer == "pow"){
+                    tokens.push_back({TokenType::POW});
                     buffer.clear();
                 }
                 else {
@@ -85,6 +91,10 @@ public:
             }
             else if (peak().value() == '='){
                 tokens.push_back({TokenType::EQUALS});
+                consume();
+            }
+            else if (peak().value() == ','){
+                tokens.push_back({TokenType::COMMA});
                 consume();
             }
             else if (isspace(peak().value())){

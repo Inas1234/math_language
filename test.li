@@ -1,3 +1,4 @@
 var x = 2
-var y = 6 + 2
-fin x + y
+var y = (6 + 2) * 2
+var z = pow(x, y)
+fin z

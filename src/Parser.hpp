@@ -52,9 +52,14 @@ struct NodeExprIdentifier
     Token token;
 };
 
+struct NodeExprPow{
+    std::shared_ptr<NodeExpr> base;
+    std::shared_ptr<NodeExpr> exponent;
+};
+
 struct NodeExpr
 {
-    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision, NodeExprIdentifier> node;    
+    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision, NodeExprIdentifier, NodeExprPow> node;    
 };
 
 struct NodeStmtExit{
@@ -66,8 +71,14 @@ struct NodeStmtVar{
     NodeExpr expr;
 };
 
+struct NodeStmtPow {
+    NodeExpr base;
+    NodeExpr exponent;
+};
+
+
 struct NodeStmt{
-    std::variant<NodeStmtExit, NodeStmtVar> node;
+    std::variant<NodeStmtExit, NodeStmtVar, NodeStmtPow> node;
 };
 
 struct Node
@@ -96,6 +107,29 @@ class Parser {
         };
 
         std::optional<NodeExpr> parseExpression() {
+            if (peak().has_value() && peak().value().type == TokenType::POW && peak(1).value().type == TokenType::OPENPAREN) {
+                consume();
+                consume();
+                auto base = parsePrimaryExpression();
+                if (!base) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::COMMA)) {
+                    return {};
+                }
+                consume();
+
+                auto exponent = parsePrimaryExpression();
+                if (!exponent) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+
+                return NodeExpr{ NodeExprPow{std::make_shared<NodeExpr>(base.value()), std::make_shared<NodeExpr>(exponent.value())} };
+            }
+
+
             auto left = parsePrimaryExpression();
             if (!left) return {};
 
@@ -131,6 +165,7 @@ class Parser {
                     left = NodeExpr{ NodeBinaryExprDivision{op, std::make_shared<NodeExpr>(left.value()), std::make_shared<NodeExpr>(right.value())} };
 
                 }
+
                 else {
                     break;
                 }
@@ -167,7 +202,8 @@ class Parser {
                 }
             }
             return {};
-        }
+        }   
+        
 
         std::optional<NodeStmt> parseStatement() {
             if (peak().has_value() && peak().value().type == TokenType::END) {
@@ -194,6 +230,27 @@ class Parser {
                         }
                     }
                 }
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::POW && peak(1).value().type == TokenType::OPENPAREN) {
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::COMMA)) {
+                    return {};
+                }
+                consume();
+
+                auto exponent = parseExpression();
+                if (!exponent) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+
+                return NodeStmt{ NodeStmtPow{base.value(), exponent.value()} };
             }
             else{
                 return {};
