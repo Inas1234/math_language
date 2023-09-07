@@ -107,6 +107,8 @@ class Parser {
         };
 
         std::optional<NodeExpr> parseExpression() {
+            std::optional<NodeExpr> node_expr;
+
             if (peak().has_value() && peak().value().type == TokenType::POW && peak(1).value().type == TokenType::OPENPAREN) {
                 consume();
                 consume();
@@ -125,13 +127,13 @@ class Parser {
                     return {};
                 }
                 consume();
-
-                return NodeExpr{ NodeExprPow{std::make_shared<NodeExpr>(base.value()), std::make_shared<NodeExpr>(exponent.value())} };
+                node_expr = NodeExpr{ NodeExprPow{std::make_shared<NodeExpr>(base.value()), std::make_shared<NodeExpr>(exponent.value())} };
+            }
+            else {
+                node_expr = parsePrimaryExpression();
+                if (!node_expr) return {};
             }
 
-
-            auto left = parsePrimaryExpression();
-            if (!left) return {};
 
             while (true) {
                 if (peak().has_value() && peak().value().type == TokenType::PLUS_OP) {
@@ -139,14 +141,14 @@ class Parser {
                     auto right = parsePrimaryExpression();
                     if (!right) return {}; 
 
-                    left = NodeExpr{ NodeBinaryExprPlus{op, std::make_shared<NodeExpr>(left.value()), std::make_shared<NodeExpr>(right.value())} };
+                    node_expr = NodeExpr{ NodeBinaryExprPlus{op, std::make_shared<NodeExpr>(node_expr.value()), std::make_shared<NodeExpr>(right.value())} };
                 } 
                 else if (peak().has_value() && peak().value().type == TokenType::MINUS_OP){
                     Token op = consume();
                     auto right = parsePrimaryExpression();
                     if (!right) return {}; 
 
-                    left = NodeExpr{ NodeBinaryExprMinus{op, std::make_shared<NodeExpr>(left.value()), std::make_shared<NodeExpr>(right.value())} };
+                    node_expr = NodeExpr{ NodeBinaryExprMinus{op, std::make_shared<NodeExpr>(node_expr.value()), std::make_shared<NodeExpr>(right.value())} };
 
                 }
                 else if (peak().has_value() && peak().value().type == TokenType::TIMES_OP){
@@ -154,7 +156,7 @@ class Parser {
                     auto right = parsePrimaryExpression();
                     if (!right) return {}; 
 
-                    left = NodeExpr{ NodeBinaryExprTimes{op, std::make_shared<NodeExpr>(left.value()), std::make_shared<NodeExpr>(right.value())} };
+                    node_expr = NodeExpr{ NodeBinaryExprTimes{op, std::make_shared<NodeExpr>(node_expr.value()), std::make_shared<NodeExpr>(right.value())} };
 
                 }
                 else if (peak().has_value() && peak().value().type == TokenType::DIVIDE_OP){
@@ -162,7 +164,7 @@ class Parser {
                     auto right = parsePrimaryExpression();
                     if (!right) return {}; 
 
-                    left = NodeExpr{ NodeBinaryExprDivision{op, std::make_shared<NodeExpr>(left.value()), std::make_shared<NodeExpr>(right.value())} };
+                    node_expr = NodeExpr{ NodeBinaryExprDivision{op, std::make_shared<NodeExpr>(node_expr.value()), std::make_shared<NodeExpr>(right.value())} };
 
                 }
 
@@ -171,7 +173,7 @@ class Parser {
                 }
             }
 
-            return left;
+            return node_expr;
         }   
 
         std::optional<NodeExpr> parseGroupedExpression() {

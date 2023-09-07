@@ -2,9 +2,8 @@
 #include <cmath>
 int main() {
 	int x = 2;
-	int y = (6+2)*2;
-	int z = std::pow(x, y);
-	std::cout <<  z << std::endl;
+	int y = 2;
+	std::cout <<  std::pow(x, y)+x << std::endl;
 
 	return 0;
 }
