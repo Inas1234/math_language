@@ -26,12 +26,21 @@ struct NodeBinaryExprMinus
     std::shared_ptr<NodeExpr> left;
     std::shared_ptr<NodeExpr> right;
 };
+
 struct NodeBinaryExprTimes
 {
     Token token;
     std::shared_ptr<NodeExpr> left;
     std::shared_ptr<NodeExpr> right;
 };
+
+struct NodeBinaryExprDivision
+{
+    Token token;
+    std::shared_ptr<NodeExpr> left;
+    std::shared_ptr<NodeExpr> right;
+};
+
 
 struct NodeGroupedExpr
 {
@@ -41,7 +50,7 @@ struct NodeGroupedExpr
 
 struct NodeExpr
 {
-    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr> node;    
+    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision> node;    
 };
 
 struct Node
@@ -90,6 +99,14 @@ class Parser {
                     if (!right) return {}; 
 
                     left = NodeExpr{ NodeBinaryExprTimes{op, std::make_shared<NodeExpr>(left.value()), std::make_shared<NodeExpr>(right.value())} };
+
+                }
+                else if (peak().has_value() && peak().value().type == TokenType::DIVIDE_OP){
+                    Token op = consume();
+                    auto right = parsePrimaryExpression();
+                    if (!right) return {}; 
+
+                    left = NodeExpr{ NodeBinaryExprDivision{op, std::make_shared<NodeExpr>(left.value()), std::make_shared<NodeExpr>(right.value())} };
 
                 }
                 else {

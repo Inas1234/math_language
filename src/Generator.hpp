@@ -36,6 +36,11 @@ public:
                 generator->gen_expr(*node_grouped_expr.innerExpr);
                 generator->m_output << ")";
             }
+            void operator()(const NodeBinaryExprDivision& node_binary_expr_division){
+                generator->gen_expr(*node_binary_expr_division.left);
+                generator->m_output << "/";
+                generator->gen_expr(*node_binary_expr_division.right);
+            }
         };
 
         std::visit(ExprVisitor{this}, node_expr.node);

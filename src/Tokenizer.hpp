@@ -9,6 +9,7 @@ enum class TokenType{
     PLUS_OP,
     MINUS_OP,
     TIMES_OP,
+    DIVIDE_OP,
     OPENPAREN,
     CLOSEPAREN,
 };
@@ -46,6 +47,10 @@ public:
             }
             else if (peak().value() == '*'){
                 tokens.push_back({TokenType::TIMES_OP});
+                consume();
+            }
+            else if (peak().value() == '/'){
+                tokens.push_back({TokenType::DIVIDE_OP});
                 consume();
             }
             else if (peak().value() == '('){
