@@ -12,6 +12,10 @@ enum class TokenType{
     DIVIDE_OP,
     OPENPAREN,
     CLOSEPAREN,
+    VAR,
+    IDENTIFIER,
+    EQUALS,
+    END
 };
 
 struct Token
@@ -29,7 +33,25 @@ public:
         std::string buffer = "";
         
         while(peak().has_value()){
-            if (isdigit(peak().value())){
+            if (isalpha(peak().value())){
+                buffer.push_back(consume());
+                while(peak().has_value() && isalnum(peak().value())){
+                    buffer.push_back(consume());
+                }
+                if (buffer == "var"){
+                    tokens.push_back({TokenType::VAR});
+                    buffer.clear();
+                }
+                else if (buffer == "fin"){
+                    tokens.push_back({TokenType::END});
+                    buffer.clear();
+                }
+                else {
+                    tokens.push_back({TokenType::IDENTIFIER, buffer});
+                    buffer.clear();
+                }
+            }
+            else if (isdigit(peak().value())){
                 buffer.push_back(consume());
                 while(peak().has_value() && isdigit(peak().value())){
                     buffer.push_back(consume());
@@ -59,6 +81,10 @@ public:
             }
             else if (peak().value() == ')'){
                 tokens.push_back({TokenType::CLOSEPAREN});
+                consume();
+            }
+            else if (peak().value() == '='){
+                tokens.push_back({TokenType::EQUALS});
                 consume();
             }
             else if (isspace(peak().value())){

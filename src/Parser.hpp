@@ -47,15 +47,32 @@ struct NodeGroupedExpr
     std::shared_ptr<NodeExpr> innerExpr;
 };
 
+struct NodeExprIdentifier
+{
+    Token token;
+};
 
 struct NodeExpr
 {
-    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision> node;    
+    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision, NodeExprIdentifier> node;    
+};
+
+struct NodeStmtExit{
+    NodeExpr expr;
+};
+
+struct NodeStmtVar{
+    Token identifier;
+    NodeExpr expr;
+};
+
+struct NodeStmt{
+    std::variant<NodeStmtExit, NodeStmtVar> node;
 };
 
 struct Node
 {
-    std::vector<NodeExpr> node;
+    std::vector<NodeStmt> node;
 };
 
 
@@ -65,12 +82,17 @@ class Parser {
 
         std::optional<Node> parse() {
             Node node;
-            if (auto expr = parseExpression()) {
-                node.node.push_back(expr.value());
-                return node;
-            } else {
-                return {};
+            while (peak().has_value())
+            {
+                if (auto expr = parseStatement()) {
+                    node.node.push_back(expr.value());
+                }
+                else {
+                    exit(EXIT_FAILURE);
+                }
             }
+
+            return node;
         };
 
         std::optional<NodeExpr> parseExpression() {
@@ -133,16 +155,50 @@ class Parser {
             return {};
         }
 
-    std::optional<NodeExpr> parsePrimaryExpression() {
-        if (peak().has_value()) {
-            if (peak().value().type == TokenType::INT_LIT) {
-                return NodeExpr{ NodeIntLit{consume()} };
-            } else if (peak().value().type == TokenType::OPENPAREN) {
-                return parseGroupedExpression();
+        std::optional<NodeExpr> parsePrimaryExpression() {
+            if (peak().has_value()) {
+                if (peak().value().type == TokenType::INT_LIT) {
+                    return NodeExpr{ NodeIntLit{consume()} };
+                } else if (peak().value().type == TokenType::OPENPAREN) {
+                    return parseGroupedExpression();
+                }
+                else if (peak().value().type == TokenType::IDENTIFIER){
+                    return NodeExpr{ NodeExprIdentifier{consume()} };
+                }
+            }
+            return {};
+        }
+
+        std::optional<NodeStmt> parseStatement() {
+            if (peak().has_value() && peak().value().type == TokenType::END) {
+                consume();
+                NodeStmtExit node_stmt_exit;
+                if (auto expr = parseExpression()) {
+                    node_stmt_exit.expr = expr.value();
+                }
+
+                return NodeStmt{ NodeStmtExit{node_stmt_exit.expr} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::VAR){
+                consume();
+                if (peak().has_value() && peak().value().type == TokenType::IDENTIFIER){
+                    auto stmt_var = NodeStmtVar{consume()};
+                    if (peak().has_value() && peak().value().type == TokenType::EQUALS){
+                        consume();
+                        if (auto expr = parseExpression()){
+                            stmt_var.expr = expr.value();
+                            return NodeStmt{ NodeStmtVar{stmt_var.identifier, stmt_var.expr} };
+                        }
+                        else{
+                            return {};
+                        }
+                    }
+                }
+            }
+            else{
+                return {};
             }
         }
-        return {};
-    }
 
 
     private:
