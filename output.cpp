@@ -1,9 +1,9 @@
 #include <iostream>
 #include <cmath>
 int main() {
-	int x = 2;
-	int y = 2;
-	std::cout <<  std::pow(x, y)+x << std::endl;
+	int a = std::pow(2, 2);
+	int b = std::sqrt(4);
+	std::cout <<  a+b << std::endl;
 
 	return 0;
 }

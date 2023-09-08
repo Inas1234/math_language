@@ -57,9 +57,14 @@ struct NodeExprPow{
     std::shared_ptr<NodeExpr> exponent;
 };
 
+struct NodeExprSqrt{
+    std::shared_ptr<NodeExpr> base;
+};
+
+
 struct NodeExpr
 {
-    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision, NodeExprIdentifier, NodeExprPow> node;    
+    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision, NodeExprIdentifier, NodeExprPow, NodeExprSqrt> node;    
 };
 
 struct NodeStmtExit{
@@ -112,7 +117,7 @@ class Parser {
             if (peak().has_value() && peak().value().type == TokenType::POW && peak(1).value().type == TokenType::OPENPAREN) {
                 consume();
                 consume();
-                auto base = parsePrimaryExpression();
+                auto base = parseExpression();
                 if (!base) return {};
 
                 if (!(peak().has_value() && peak().value().type == TokenType::COMMA)) {
@@ -120,7 +125,7 @@ class Parser {
                 }
                 consume();
 
-                auto exponent = parsePrimaryExpression();
+                auto exponent = parseExpression();
                 if (!exponent) return {};
 
                 if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
@@ -128,6 +133,17 @@ class Parser {
                 }
                 consume();
                 node_expr = NodeExpr{ NodeExprPow{std::make_shared<NodeExpr>(base.value()), std::make_shared<NodeExpr>(exponent.value())} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::SQRT && peak(1).value().type == TokenType::OPENPAREN){
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+                node_expr = NodeExpr{ NodeExprSqrt{std::make_shared<NodeExpr>(base.value())} };
             }
             else {
                 node_expr = parsePrimaryExpression();

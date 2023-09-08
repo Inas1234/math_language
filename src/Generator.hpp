@@ -83,7 +83,11 @@ public:
                 generator->m_output << ", ";
                 generator->gen_expr(*node_expr_pow.exponent);
                 generator->m_output << ")";
-
+            }
+            void operator()(const NodeExprSqrt& node_expr_sqrt){
+                generator->m_output << "std::sqrt(";
+                generator->gen_expr(*node_expr_sqrt.base);
+                generator->m_output << ")";
             }
      
         };

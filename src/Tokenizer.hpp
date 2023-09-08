@@ -17,7 +17,8 @@ enum class TokenType{
     EQUALS,
     END,
     POW,
-    COMMA
+    COMMA,
+    SQRT
 };
 
 struct Token
@@ -50,6 +51,10 @@ public:
                 }
                 else if (buffer == "pow"){
                     tokens.push_back({TokenType::POW});
+                    buffer.clear();
+                }
+                else if (buffer == "sqrt"){
+                    tokens.push_back({TokenType::SQRT});
                     buffer.clear();
                 }
                 else {
