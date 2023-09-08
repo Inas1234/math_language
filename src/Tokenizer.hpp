@@ -18,7 +18,12 @@ enum class TokenType{
     END,
     POW,
     COMMA,
-    SQRT
+    SQRT,
+    COS,
+    SIN,
+    TAN,
+    LOG,
+    LN
 };
 
 struct Token
@@ -55,6 +60,26 @@ public:
                 }
                 else if (buffer == "sqrt"){
                     tokens.push_back({TokenType::SQRT});
+                    buffer.clear();
+                }
+                else if (buffer == "cos"){
+                    tokens.push_back({TokenType::COS});
+                    buffer.clear();
+                }
+                else if (buffer == "sin"){
+                    tokens.push_back({TokenType::SIN});
+                    buffer.clear();
+                }
+                else if (buffer == "tan"){
+                    tokens.push_back({TokenType::TAN});
+                    buffer.clear();
+                }
+                else if (buffer == "log"){
+                    tokens.push_back({TokenType::LOG});
+                    buffer.clear();
+                }
+                else if (buffer == "ln"){
+                    tokens.push_back({TokenType::LN});
                     buffer.clear();
                 }
                 else {

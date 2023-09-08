@@ -89,7 +89,33 @@ public:
                 generator->gen_expr(*node_expr_sqrt.base);
                 generator->m_output << ")";
             }
-     
+            void operator()(const NodeExprSin& node_expr_sin){
+                generator->m_output << "std::sin(";
+                generator->gen_expr(*node_expr_sin.base);
+                generator->m_output << ")";
+            }
+            void operator()(const NodeExprCos& node_expr_cos){
+                generator->m_output << "std::cos(";
+                generator->gen_expr(*node_expr_cos.base);
+                generator->m_output << ")";
+            }
+            void operator()(const NodeExprTan& node_expr_tan){
+                generator->m_output << "std::tan(";
+                generator->gen_expr(*node_expr_tan.base);
+                generator->m_output << ")";
+            }
+            void operator()(const NodeExprLog& node_expr_log){
+                generator->m_output << "customlog(";
+                generator->gen_expr(*node_expr_log.base);
+                generator->m_output << ", ";
+                generator->gen_expr(*node_expr_log.exponent);
+                generator->m_output << ")";
+            }
+            void operator()(const NodeExprLn& node_expr_ln){
+                generator->m_output << "std::log(";
+                generator->gen_expr(*node_expr_ln.base);
+                generator->m_output << ")";
+            }
         };
 
         std::visit(ExprVisitor{this}, node_expr.node);
@@ -98,6 +124,10 @@ public:
     std::string generate() {
         m_output << "#include <iostream>" << std::endl;
         m_output << "#include <cmath>" << std::endl;
+
+        m_output << "double customlog(double base, double x) {" << std::endl;
+        m_output << "\treturn std::log(x) / std::log(base);" << std::endl;
+        m_output << "}\n" << std::endl;
         m_output << "int main() {" << std::endl;
 
         for (const auto& node_expr : node.node) {

@@ -61,10 +61,38 @@ struct NodeExprSqrt{
     std::shared_ptr<NodeExpr> base;
 };
 
+struct NodeExprSin{
+    std::shared_ptr<NodeExpr> base;
+};
+
+struct NodeExprCos{
+    std::shared_ptr<NodeExpr> base;
+};
+
+struct NodeExprTan{
+    std::shared_ptr<NodeExpr> base;
+};
+
+struct NodeExprLog
+{
+    std::shared_ptr<NodeExpr> base;
+    std::shared_ptr<NodeExpr> exponent;
+};
+
+struct NodeExprLn
+{
+    std::shared_ptr<NodeExpr> base;
+};
+
 
 struct NodeExpr
 {
-    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision, NodeExprIdentifier, NodeExprPow, NodeExprSqrt> node;    
+    std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, 
+                NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision, 
+                NodeExprIdentifier, NodeExprPow, NodeExprSqrt,
+                NodeExprSin, NodeExprCos, NodeExprTan,
+                NodeExprLog, NodeExprLn
+                > node;    
 };
 
 struct NodeStmtExit{
@@ -111,6 +139,7 @@ class Parser {
             return node;
         };
 
+
         std::optional<NodeExpr> parseExpression() {
             std::optional<NodeExpr> node_expr;
 
@@ -144,6 +173,71 @@ class Parser {
                 }
                 consume();
                 node_expr = NodeExpr{ NodeExprSqrt{std::make_shared<NodeExpr>(base.value())} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::SIN && peak(1).value().type == TokenType::OPENPAREN){
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+                node_expr = NodeExpr{ NodeExprSin{std::make_shared<NodeExpr>(base.value())} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::COS && peak(1).value().type == TokenType::OPENPAREN){
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+                node_expr = NodeExpr{ NodeExprCos{std::make_shared<NodeExpr>(base.value())} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::TAN && peak(1).value().type == TokenType::OPENPAREN){
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+                node_expr = NodeExpr{ NodeExprTan{std::make_shared<NodeExpr>(base.value())} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::LOG && peak(1).value().type == TokenType::OPENPAREN) {
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::COMMA)) {
+                    return {};
+                }
+                consume();
+
+                auto exponent = parseExpression();
+                if (!exponent) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+                node_expr = NodeExpr{ NodeExprLog{std::make_shared<NodeExpr>(base.value()), std::make_shared<NodeExpr>(exponent.value())} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::LN && peak(1).value().type == TokenType::OPENPAREN) {
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+                node_expr = NodeExpr{ NodeExprLn{std::make_shared<NodeExpr>(base.value())} };
             }
             else {
                 node_expr = parsePrimaryExpression();
