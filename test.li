@@ -1,2 +1,2 @@
-float x = -2.5;
-fin abs(x)
+float x = rand(1, 10);
+fin x

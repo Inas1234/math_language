@@ -101,6 +101,12 @@ struct NodeExprAbs{
     std::shared_ptr<NodeExpr> base;
 };
 
+struct NodeExprRand{
+    std::shared_ptr<NodeExpr> base;
+    std::shared_ptr<NodeExpr> exponent;
+};
+
+
 struct NodeExpr
 {
     std::variant<NodeIntLit, NodeBinaryExprPlus, NodeBinaryExprMinus, 
@@ -108,7 +114,7 @@ struct NodeExpr
                 NodeExprIdentifier, NodeExprPow, NodeExprSqrt,
                 NodeExprSin, NodeExprCos, NodeExprTan,
                 NodeExprLog, NodeExprLn, NodeBinaryExprMod,
-                NodeExprAbs
+                NodeExprAbs, NodeExprRand
                 > node;    
 };
 
@@ -272,6 +278,26 @@ class Parser {
                 }
                 consume();
                 node_expr = NodeExpr{ NodeExprAbs{std::make_shared<NodeExpr>(base.value())} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::RAND && peak(1).value().type == TokenType::OPENPAREN) {
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::COMMA)) {
+                    return {};
+                }
+                consume();
+
+                auto exponent = parseExpression();
+                if (!exponent) return {};
+
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+                node_expr = NodeExpr{ NodeExprRand{std::make_shared<NodeExpr>(base.value()), std::make_shared<NodeExpr>(exponent.value())} };
             }
             else {
                 node_expr = parsePrimaryExpression();

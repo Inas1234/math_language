@@ -27,7 +27,8 @@ enum class TokenType{
     TAN,
     LOG,
     LN,
-    ABS
+    ABS,
+    RAND
 };
 
 struct Token
@@ -56,6 +57,10 @@ public:
                 }
                 else if (buffer == "mod"){
                     tokens.push_back({TokenType::MOD});
+                    buffer.clear();
+                }
+                else if (buffer == "rand"){
+                    tokens.push_back({TokenType::RAND});
                     buffer.clear();
                 }
                 else if (buffer == "abs"){

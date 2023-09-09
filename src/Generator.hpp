@@ -141,6 +141,15 @@ public:
                 generator->gen_expr(*node_expr_ln.base);
                 generator->m_output << ")";
             }
+            void operator()(const NodeExprRand& node_expr_ln){
+                generator->m_output << " std::rand()%(";
+                generator->gen_expr(*node_expr_ln.exponent);
+                generator->m_output << "-";
+                generator->gen_expr(*node_expr_ln.base);
+                generator->m_output << "+1";
+                generator->m_output << ")+";
+                generator->gen_expr(*node_expr_ln.base);
+            }
         };
 
         std::visit(ExprVisitor{this}, node_expr.node);
@@ -149,12 +158,13 @@ public:
     std::string generate() {
         m_output << "#include <iostream>" << std::endl;
         m_output << "#include <cmath>" << std::endl;
+        m_output << "#include <ctime>" << std::endl;
 
         m_output << "double customlog(double base, double x) {" << std::endl;
         m_output << "\treturn std::log(x) / std::log(base);" << std::endl;
         m_output << "}\n" << std::endl;
         m_output << "int main() {" << std::endl;
-
+        m_output << "\tstd::srand(std::time(NULL));" << std::endl;
         for (const auto& node_expr : node.node) {
             gen_stmt(node_expr);
         }
