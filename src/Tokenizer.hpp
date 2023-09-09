@@ -26,7 +26,8 @@ enum class TokenType{
     SIN,
     TAN,
     LOG,
-    LN
+    LN,
+    ABS
 };
 
 struct Token
@@ -55,6 +56,10 @@ public:
                 }
                 else if (buffer == "mod"){
                     tokens.push_back({TokenType::MOD});
+                    buffer.clear();
+                }
+                else if (buffer == "abs"){
+                    tokens.push_back({TokenType::ABS});
                     buffer.clear();
                 }
                 else if (buffer == "float"){
@@ -101,15 +106,12 @@ public:
             else if (isdigit(peak().value())){
                 buffer.push_back(consume());
                 
-                // Flag to determine if a '.' is encountered in the number
                 bool isFloat = false;
 
                 while(peak().has_value() && (isdigit(peak().value()) || peak().value() == '.')){
-                    // If '.' is encountered, set the isFloat flag
                     if (peak().value() == '.') {
                         if (isFloat) {
                             std::cerr << "Error: Multiple '.' in number." << std::endl;
-                            // Handle error as appropriate for your application
                         }
                         isFloat = true;
                     }

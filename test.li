@@ -1,2 +1,2 @@
 float x = -2.5;
-fin 11 mod 2
+fin abs(x)

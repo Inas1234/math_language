@@ -97,6 +97,9 @@ struct NodeExprLn
     std::shared_ptr<NodeExpr> base;
 };
 
+struct NodeExprAbs{
+    std::shared_ptr<NodeExpr> base;
+};
 
 struct NodeExpr
 {
@@ -104,7 +107,8 @@ struct NodeExpr
                 NodeBinaryExprTimes, NodeGroupedExpr, NodeBinaryExprDivision, 
                 NodeExprIdentifier, NodeExprPow, NodeExprSqrt,
                 NodeExprSin, NodeExprCos, NodeExprTan,
-                NodeExprLog, NodeExprLn, NodeBinaryExprMod
+                NodeExprLog, NodeExprLn, NodeBinaryExprMod,
+                NodeExprAbs
                 > node;    
 };
 
@@ -257,6 +261,17 @@ class Parser {
                 }
                 consume();
                 node_expr = NodeExpr{ NodeExprLn{std::make_shared<NodeExpr>(base.value())} };
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::ABS && peak(1).value().type == TokenType::OPENPAREN){
+                consume();
+                consume();
+                auto base = parseExpression();
+                if (!base) return {};
+                if (!(peak().has_value() && peak().value().type == TokenType::CLOSEPAREN)) {
+                    return {};
+                }
+                consume();
+                node_expr = NodeExpr{ NodeExprAbs{std::make_shared<NodeExpr>(base.value())} };
             }
             else {
                 node_expr = parsePrimaryExpression();

@@ -6,7 +6,7 @@ double customlog(double base, double x) {
 
 int main() {
 	float x = 0-2.5;
-	std::cout <<  11 % 2 << std::endl;
+	std::cout <<   std::abs(x) << std::endl;
 
 	return 0;
 }

@@ -65,7 +65,6 @@ public:
             }
             void operator()(const NodeBinaryExprMinus& node_binary_expr_minus){
                 if (node_binary_expr_minus.left.has_value()) {
-                    std::cout << "left has value" << std::endl;
                     generator->gen_expr(*node_binary_expr_minus.left.value());
                 }
                 else {
@@ -136,6 +135,11 @@ public:
                 generator->m_output << " % ";
                 generator->gen_expr(*node_expr_ln.right);
                 
+            }
+            void operator()(const NodeExprAbs& node_expr_ln){
+                generator->m_output << " std::abs(";
+                generator->gen_expr(*node_expr_ln.base);
+                generator->m_output << ")";
             }
         };
 
