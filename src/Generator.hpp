@@ -64,7 +64,13 @@ public:
                 generator->gen_expr(*node_binary_expr_plus.right);
             }
             void operator()(const NodeBinaryExprMinus& node_binary_expr_minus){
-                generator->gen_expr(*node_binary_expr_minus.left);
+                if (node_binary_expr_minus.left.has_value()) {
+                    std::cout << "left has value" << std::endl;
+                    generator->gen_expr(*node_binary_expr_minus.left.value());
+                }
+                else {
+                    generator->m_output << "0";
+                }
                 generator->m_output << "-";
                 generator->gen_expr(*node_binary_expr_minus.right);
             }
@@ -124,6 +130,12 @@ public:
                 generator->m_output << "std::log(";
                 generator->gen_expr(*node_expr_ln.base);
                 generator->m_output << ")";
+            }
+            void operator()(const NodeBinaryExprMod& node_expr_ln){
+                generator->gen_expr(*node_expr_ln.left);
+                generator->m_output << " % ";
+                generator->gen_expr(*node_expr_ln.right);
+                
             }
         };
 

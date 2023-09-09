@@ -11,6 +11,7 @@ enum class TokenType{
     MINUS_OP,
     TIMES_OP,
     DIVIDE_OP,
+    MOD,
     OPENPAREN,
     CLOSEPAREN,
     INT,
@@ -50,6 +51,10 @@ public:
                 }
                 if (buffer == "int"){
                     tokens.push_back({TokenType::INT});
+                    buffer.clear();
+                }
+                else if (buffer == "mod"){
+                    tokens.push_back({TokenType::MOD});
                     buffer.clear();
                 }
                 else if (buffer == "float"){

@@ -5,11 +5,8 @@ double customlog(double base, double x) {
 }
 
 int main() {
-	int a = std::pow(2, 2);
-	int b = std::sqrt(4);
-	int c = std::cos(90);
-	float d = 4.2;
-	std::cout <<  d << std::endl;
+	float x = 0-2.5;
+	std::cout <<  11 % 2 << std::endl;
 
 	return 0;
 }
