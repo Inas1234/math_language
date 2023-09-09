@@ -6,13 +6,15 @@
 
 enum class TokenType{
     INT_LIT,
+    FLOAT_LIT,
     PLUS_OP,
     MINUS_OP,
     TIMES_OP,
     DIVIDE_OP,
     OPENPAREN,
     CLOSEPAREN,
-    VAR,
+    INT,
+    FLOAT,
     IDENTIFIER,
     EQUALS,
     END,
@@ -46,8 +48,12 @@ public:
                 while(peak().has_value() && isalnum(peak().value())){
                     buffer.push_back(consume());
                 }
-                if (buffer == "var"){
-                    tokens.push_back({TokenType::VAR});
+                if (buffer == "int"){
+                    tokens.push_back({TokenType::INT});
+                    buffer.clear();
+                }
+                else if (buffer == "float"){
+                    tokens.push_back({TokenType::FLOAT});
                     buffer.clear();
                 }
                 else if (buffer == "fin"){
@@ -89,10 +95,27 @@ public:
             }
             else if (isdigit(peak().value())){
                 buffer.push_back(consume());
-                while(peak().has_value() && isdigit(peak().value())){
+                
+                // Flag to determine if a '.' is encountered in the number
+                bool isFloat = false;
+
+                while(peak().has_value() && (isdigit(peak().value()) || peak().value() == '.')){
+                    // If '.' is encountered, set the isFloat flag
+                    if (peak().value() == '.') {
+                        if (isFloat) {
+                            std::cerr << "Error: Multiple '.' in number." << std::endl;
+                            // Handle error as appropriate for your application
+                        }
+                        isFloat = true;
+                    }
                     buffer.push_back(consume());
                 }
-                tokens.push_back({TokenType::INT_LIT, buffer});
+                
+                if (isFloat) {
+                    tokens.push_back({TokenType::FLOAT_LIT, buffer});
+                } else {
+                    tokens.push_back({TokenType::INT_LIT, buffer});
+                }
                 buffer.clear();
             }
             else if (peak().value() == '+'){

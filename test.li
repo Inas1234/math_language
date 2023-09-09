@@ -1,3 +1,5 @@
-var a = pow(2, 2)
-var b = sqrt(4) 
-fin ln(2)
+int a = pow(2, 2)
+int b = sqrt(4)
+int c = cos(90)
+float d = 4.2
+fin d

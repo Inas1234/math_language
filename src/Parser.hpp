@@ -10,6 +10,11 @@ struct NodeIntLit
 {
     Token token;
 };
+struct NodeFloatLit
+{
+    Token token;
+};
+
 
 struct NodeExpr;
 
@@ -99,10 +104,16 @@ struct NodeStmtExit{
     NodeExpr expr;
 };
 
-struct NodeStmtVar{
+struct NodeStmtVarINT{
     Token identifier;
     NodeExpr expr;
 };
+
+struct NodeStmtVarFLOAT{
+    Token identifier;
+    NodeExpr expr;
+};
+
 
 struct NodeStmtPow {
     NodeExpr base;
@@ -111,7 +122,7 @@ struct NodeStmtPow {
 
 
 struct NodeStmt{
-    std::variant<NodeStmtExit, NodeStmtVar, NodeStmtPow> node;
+    std::variant<NodeStmtExit, NodeStmtVarINT, NodeStmtPow, NodeStmtVarFLOAT> node;
 };
 
 struct Node
@@ -304,7 +315,7 @@ class Parser {
 
         std::optional<NodeExpr> parsePrimaryExpression() {
             if (peak().has_value()) {
-                if (peak().value().type == TokenType::INT_LIT) {
+                if (peak().value().type == TokenType::INT_LIT || peak().value().type == TokenType::FLOAT_LIT) {
                     return NodeExpr{ NodeIntLit{consume()} };
                 } else if (peak().value().type == TokenType::OPENPAREN) {
                     return parseGroupedExpression();
@@ -327,15 +338,31 @@ class Parser {
 
                 return NodeStmt{ NodeStmtExit{node_stmt_exit.expr} };
             }
-            else if (peak().has_value() && peak().value().type == TokenType::VAR){
+            else if (peak().has_value() && peak().value().type == TokenType::INT){
                 consume();
                 if (peak().has_value() && peak().value().type == TokenType::IDENTIFIER){
-                    auto stmt_var = NodeStmtVar{consume()};
+                    auto stmt_var = NodeStmtVarINT{consume()};
                     if (peak().has_value() && peak().value().type == TokenType::EQUALS){
                         consume();
                         if (auto expr = parseExpression()){
                             stmt_var.expr = expr.value();
-                            return NodeStmt{ NodeStmtVar{stmt_var.identifier, stmt_var.expr} };
+                            return NodeStmt{ NodeStmtVarINT{stmt_var.identifier, stmt_var.expr} };
+                        }
+                        else{
+                            return {};
+                        }
+                    }
+                }
+            }
+            else if (peak().has_value() && peak().value().type == TokenType::FLOAT){
+                consume();
+                if (peak().has_value() && peak().value().type == TokenType::IDENTIFIER){
+                    auto stmt_var = NodeStmtVarFLOAT{consume()};
+                    if (peak().has_value() && peak().value().type == TokenType::EQUALS){
+                        consume();
+                        if (auto expr = parseExpression()){
+                            stmt_var.expr = expr.value();
+                            return NodeStmt{ NodeStmtVarFLOAT{stmt_var.identifier, stmt_var.expr} };
                         }
                         else{
                             return {};

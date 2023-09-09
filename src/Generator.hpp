@@ -19,8 +19,17 @@ public:
                 generator->m_output << " << std::endl;\n";
             }
 
-            void operator()(const NodeStmtVar& node_stmt_var){
+            void operator()(const NodeStmtVarINT& node_stmt_var){
                 generator->m_output << "\tint ";
+                generator->m_output << node_stmt_var.identifier.value.value();
+                generator->m_output << " = ";
+                generator->gen_expr(node_stmt_var.expr);
+                generator->m_output << ";\n";
+
+                generator->m_vars[node_stmt_var.identifier.value.value()] = Var{node_stmt_var.identifier.value.value()};
+            }  
+            void operator()(const NodeStmtVarFLOAT& node_stmt_var){
+                generator->m_output << "\tfloat ";
                 generator->m_output << node_stmt_var.identifier.value.value();
                 generator->m_output << " = ";
                 generator->gen_expr(node_stmt_var.expr);
